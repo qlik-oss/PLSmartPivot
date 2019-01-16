@@ -1,4 +1,7 @@
-define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
+define(["jquery",
+		"text!./css/PLSmartPivot.css"		
+		], 
+	function(e,t) {'use strict';
 	return e("<style>").html(t).appendTo("head"),{
 		initialProperties : {
 			version: 1.0,
@@ -72,9 +75,7 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 									}, {
 										value: 10,
 										label: "100k cells"
-									}
-																		
-									],
+									}],
 								  defaultValue: 2,
 							        },
 								ErrorMessage : {
@@ -172,6 +173,9 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 										value: "Navy",
 										label: "Navy"
 									}, {
+										value: "rgb(224,167,75)",
+										label: "Orange"
+									}, {
 										value: "Purple",
 										label: "Purple"																		
 									}, {
@@ -204,6 +208,20 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 									}],
 									defaultValue: 2								
 								},
+								ApplyFootTags : {
+									ref : "applyfoottags",
+									type : "boolean",
+									component : "switch",
+									label : "Apply foot tags to Concepts",
+									options: [{
+										value: true,
+										label: "On"
+									}, {
+										value: false,
+										label: "Off"
+									}],
+									defaultValue: false
+								}
 							}
 						},
 						Formatted: {
@@ -214,6 +232,12 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 									ref : "indentbool",
 									type : "boolean",
 									label : "Indent",
+									defaultValue : true								
+								},
+								CollapseBool : {
+									ref : "collapsebool",
+									type : "boolean",
+									label : "Allow to Collapse",
 									defaultValue : true								
 								},
 								SeparatorColumns : {
@@ -343,6 +367,9 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 										value: "MS Sans Serif",
 										label: "MS Sans Serif"
 									}, {
+										value: "QlikView Sans,sans-serif",
+										label: "QlikView Sans,sans-serif"
+									}, {
 										value: "Tahoma",
 										label: "Tahoma"
 									}, {
@@ -352,7 +379,7 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 									
 									
 									],
-								  defaultValue: "Calibri"								  
+								  defaultValue: "QlikView Sans,sans-serif"								  
 							        },
 								DataFontSize:{
 									ref: "lettersize",
@@ -370,6 +397,23 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 									//	label: "Large"
 									}],
 									defaultValue: 2								
+								},
+								ConceptsAlignment:{
+									ref: "concalign",
+									translation: "Text Alignment",
+									type: "string",
+									component: "buttongroup",
+									options: [ {
+										value: "left",
+										label: "left"
+									}, {
+										value: "center",
+										label: "center"									
+									}, {
+										value: "right",
+										label: "right"									
+									}],
+									defaultValue: "left"							
 								},
 								ColumnWidthSlider: {
 									type: "number",
@@ -400,7 +444,7 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 										label: "Off"
 									}],
 									defaultValue: true
-								},
+								},														
 								FilterOnCellClick: {
 									ref: "filteroncellclick",
 									type: "boolean",
@@ -775,9 +819,12 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 		],
 		paint : function(t,a) {
 			var isIE = /*@cc_on!@*/false || !!document.documentMode;
-			var isChrome = !!window.chrome && !!window.chrome.webstore;
+			var isChrome = window.chrome;//!!window.chrome && !!window.chrome.webstore;
 			var isSafari = Object.prototype.toString.call(window.HTMLElement).indexOf('Constructor') > 0;
 			var isFirefox = typeof InstallTrigger !== 'undefined';
+
+			var vIconMinus = false;
+			var vIconPlus = false;
 			
 			var sufixCells = "";
 			var sufixWrap = "";
@@ -802,19 +849,24 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			var myTitle = "";
 			var mySubTitle = "";
 			var myFootNote = "";
+			var myFootNoteAux = "";
 			if(this.backendApi.model.layout.title.length > 0){
-				myTitle += '<p style="font-size:15pt"><b>';
-				myTitle += this.backendApi.model.layout.title;
+				myTitle += '<p style="font-size:15px"><b>';
+				var vTitAux = this.backendApi.model.layout.title;
+				myTitle += vTitAux.split(' ').join('&nbsp;');
 				myTitle += '</b></p>';
 			}
 			if(this.backendApi.model.layout.subtitle.length > 0){
-				mySubTitle += '<p style="font-size:11pt">';
-				mySubTitle += this.backendApi.model.layout.subtitle;
+				mySubTitle += '<p style="font-size:11px">';
+				var vSubTitAux = this.backendApi.model.layout.subtitle;
+				mySubTitle += vSubTitAux.split(' ').join('&nbsp;');
 				mySubTitle += '</p>';
 			}
 			if(this.backendApi.model.layout.footnote.length > 0){
-				myFootNote += '<p style="font-size:11pt"><i>Note:</i>';
-				myFootNote += this.backendApi.model.layout.footnote;
+				myFootNote += '<p style="font-size:11px"><i>Note:</i>';
+				var vFootAux = this.backendApi.model.layout.footnote;
+				myFootNoteAux = vFootAux;
+				myFootNote += vFootAux.split(' ').join('&nbsp;');
 				myFootNote += '</p>';
 			}
 			
@@ -832,6 +884,7 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			var vCustomFile = this.backendApi.model.layout.customfile;
 			
 			var vPadding = this.backendApi.model.layout.indentbool;
+			var vCollapse = this.backendApi.model.layout.collapsebool;
 			var vPaddingText = "";
 			
 			var vGlobalComas = 0;
@@ -878,6 +931,7 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			var vColorSchemaP = eval(vDynamicColorBodyP);
 			
 			var vExportToExcel = this.backendApi.model.layout.allowexportxls;
+			
 			var vFontFamily = this.backendApi.model.layout.FontFamily;
 			var vFontSize = "";
 			
@@ -903,6 +957,8 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			
 			var vLetterSize = 0;
 			var vLetterSizeHeader = 0;
+			var vApplyFootTags = this.backendApi.model.layout.applyfoottags;
+
 			switch (this.backendApi.model.layout.lettersizeheader)
 			{
 				case 1:
@@ -927,11 +983,12 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				vLetterSize = 2;
 				break;
 			}
+			var vTextAlign = this.backendApi.model.layout.concalign;
 			
 			var vIndent = "";
 			
 			var vSymbolForNulls = this.backendApi.model.layout.symbolfornulls;
-			
+			var vRemoveRows = new Array();
 			var vAllSemaphores = this.backendApi.model.layout.allsemaphores;			
 			var ConceptsAffectedMatrix = new Array(10);
 			if (vAllSemaphores == false) {				
@@ -966,9 +1023,13 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			var vDimName = "";
 			var CustomArray = new Array();
 			var CustomArrayBasic = new Array();
+			var CustomParents = new Array();	
+			var CustomParents2	= new Array();
+			var CustomParents2L	= new Array();
+			var ArrayOff = new Array();
+			var vNumAccounts = 0;
 			var vNumCustomHeaders = 0;
-			
-			
+			var headers = new Array();				
 			
 			var ConceptMatrix = new Array();
 			var ConceptMatrixFirst = new Array();
@@ -986,6 +1047,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			var vMaskNum = 0;
 			var html2 = "";
 			var StyleTags = "";
+			var	StyleTags1 = "";
+			var	StyleTags2 = "";
+			var	StyleTags3 = "";
+			var	StyleTags4 = "";
+			var	StyleTags5 = "";
+			var	StyleTags6 = "";
+			var	StyleTags7 = "";
+			var	StyleTags8 = "";
+			var	StyleTags9 = "";
 			
 			var vNumDims = 0;
 			var vNumMeasures = 0;
@@ -998,12 +1068,13 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			var ExtraLabelsArray = new Array();
 			var vExtraLabel = "";
 			var vMoreButtonCode = "";
-			var vExcelButtonCode = "";			
+			var vExcelButtonCode = "";	
 			
 			var self = this, lastrow = 0, morebutton = false;
 			var f = "";
 			
 			var nRows = this.backendApi.getRowCount();
+			
 			f += "<div class='header-wrapper'> <table class='header'><tr>";
 			
 			
@@ -1018,10 +1089,11 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				if (dim_count == 1) {
 					
 					if(vExportToExcel) {		
-						vExcelButtonCode = '<input class = "icon-xls" type = "image" src="/Extensions/PLSmartPivot/Excel.png">';						
+						vExcelButtonCode = '<input class = "icon-xls" type = "image" src="/Extensions/PLSmartPivot/img/Excel.png">';
 					}else{
 						vExcelButtonCode = "";					 
 					}
+					
 					f += '<th class="fdim-cells" style="cursor:default;color:' + vHeaderColorText + ';font-family:' + vFontFamily + ';background-color:' + vHeaderColorSchema + ';font-size:' + (17 + vLetterSizeHeader) + 'px;height:70px;width:230px;vertical-align:middle;text-align:' + vHeaderAlignText + '">' + vExcelButtonCode + t.qFallbackTitle + '</th>';
 			
 				}
@@ -1078,8 +1150,7 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						sufixWrap = 'Empty';
 					}
 					f += '<th class="grid-cells2' + sufixCells + '" style="cursor:default' + ';color:' + vHeaderColorText +';font-family:' + vFontFamily + ';background-color:' + vHeaderColorSchema + ';font-size:' + (15 + vLetterSizeHeader) + 'px;height:70px;vertical-align:middle;text-align:' + vHeaderAlignText + '"><span class = "wrapclass' + sufixWrap + '" style="font-family:' + vFontFamily + '">' + t.qFallbackTitle + vExtraLabel + '</span></th>';
-				}	
-				
+				}
 			});
 									
 			var vColumnTextUpper = "";
@@ -1098,7 +1169,7 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				
 				var vBoldNumber = 0;
 				var vTagText = "";
-				var vComment = 0;
+				//var vComment = 0;
 				
 				var dim = a[0];
 				
@@ -1142,7 +1213,7 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			if (nRows >= (vMaxLoops * 1000)) {
 				alert(vErrorMessage);
 			}
-			
+			ConceptMatrixFirstClean = ConceptMatrixFirst.filter(onlyUnique);
 			// particular headers in case you have more than 1 dimension
 			if (vNumDims == 2) {
 				//new array with unique values for 2nd dim
@@ -1166,19 +1237,19 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 					}					
 				}
 				
-				ConceptMatrixFirstClean = ConceptMatrixFirst.filter(onlyUnique);
+				
 				SecondHeaderLength = SecondHeader.length;
 				vNumMeasures2 = vNumMeasures * SecondHeaderLength;
 				
 				if(measure_count>1){
 					
 					if(vExportToExcel) {		
-						vExcelButtonCode = '<input class = "icon-xls" type = "image" src="/Extensions/PLSmartPivot/Excel.png">';						
+						vExcelButtonCode = '<input class = "icon-xls" type = "image" src="/Extensions/PLSmartPivot/img/Excel.png">';						
 					}else{
 						vExcelButtonCode = "";					 
-					}
+					}					
 					
-					f += '<th class="fdim-cells" rowspan="2" padding-left="20px" style="cursor:default;color:' + vHeaderColorText +';font-family:' + vFontFamily + ';background-color:' + vHeaderColorSchema + ';font-size:' + (16 + vLetterSizeHeader) + 'px;height:80px;width:230px;vertical-align:middle;text-align:' + vHeaderAlignText + '">' + vExcelButtonCode + LabelsArray[0] + '</th>';
+					f += '<th class="fdim-cells" rowspan="2" padding-left="20px" style="cursor:default;color:' + vHeaderColorText +';font-family:' + vFontFamily + ';background-color:' + vHeaderColorSchema + ';font-size:' + (16 + vLetterSizeHeader) + 'px;height:80px;width:230px;vertical-align:middle;text-align:' + vHeaderAlignText + '">' + vExcelButtonCode +LabelsArray[0] + '</th>';
 				
 					for (var nSecond=0;nSecond<SecondHeaderLength;nSecond++){//second dimension header
 						if(vSeparatorCols && nSecond > 0){						
@@ -1206,11 +1277,12 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				}else{
 					
 					if(vExportToExcel) {		
-						vExcelButtonCode = '<input class = "icon-xls" type = "image" src="/Extensions/PLSmartPivot/Excel.png">';						
+						vExcelButtonCode = '<input class = "icon-xls" type = "image" src="/Extensions/PLSmartPivot/img/Excel.png">';						
 					}else{
 						vExcelButtonCode = "";					 
 					}
-					f += '<th class="fdim-cells" style="cursor:default;color:' + vHeaderColorText +';background-color:' + vHeaderColorSchema + ';font-family:' + vFontFamily + ';font-size:' + (16 + vLetterSizeHeader) + 'px;height:70px;width:230px;vertical-align:middle;text-align:' + vHeaderAlignText + '">' + vExcelButtonCode + LabelsArray[0] + ExtraLabelsArray[0] + '</th>';
+					
+					f += '<th class="fdim-cells" style="cursor:default;color:' + vHeaderColorText +';background-color:' + vHeaderColorSchema + ';font-family:' + vFontFamily + ';font-size:' + (16 + vLetterSizeHeader) + 'px;height:70px;width:230px;vertical-align:middle;text-align:' + vHeaderAlignText + '">' + vExcelButtonCode +LabelsArray[0] + ExtraLabelsArray[0] + '</th>';
 					
 					for (var nSecond=0;nSecond<SecondHeaderLength;nSecond++){
 						if(vSeparatorCols && nSecond > 0){
@@ -1247,9 +1319,9 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			}
 			f += "</tr>";
 			f += "</table></div>";
-			f += " <div class='row-wrapper'><table >";
+			f += "<div class='row-wrapper' " + "style=text-align:" + vTextAlign + "><table >";			
 			
-			if (vCustomFileBool && vCustomFile.length > 4) {				
+			if (vCustomFileBool && vCustomFile.length > 4) {	
 				ReadCustomSchema();
 			}else{
 				PaintTheNumbers();
@@ -1258,47 +1330,77 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			//This function opens a csv file that contains the parameters for the custom mode
 			//this will prevent consuming to many dimensions, as there allowed only 10 columns between
 			//dimensions and metrics
-			function ReadCustomSchema() {				
-					var Url   = "/Extensions/PLSmartPivot/" + vCustomFile;
-					var Items = $.get(Url).then(function(response){
-						
-							
-							var allTextLines = response.split(/\r\n|\n/);
-				    		var headers = allTextLines[0].split(';');
-				    		vNumCustomHeaders = headers.length;
-				    		
-				    		for (var i=0; i<allTextLines.length; i++) {					
-								CustomArray[i] = new Array(headers.length);
-							    var data = allTextLines[i].split(';');
-								
-						        if (data.length == headers.length) {
+			function ReadCustomSchema() {							
+				var Url   = "/Extensions/PLSmartPivot/csv/" + vCustomFile;
+				var Items = $.get(Url).then(function(response){
+											
+						var allTextLines = response.split(/\r\n|\n/);
+			    		headers = allTextLines[0].split(';');
+			    		vNumCustomHeaders = headers.length;
+			    		var rightcount = 0;
+			    		for (var i=0; i<allTextLines.length; i++) {												
+						    
+						    var data = allTextLines[i].split(';');
+						    //just write lines that matches with the dimension						    
+						    if(ConceptMatrixFirstClean.indexOf(data[0])>=0 || i == 0){
+						    	CustomArray[rightcount] = new Array(headers.length);    
+								CustomParents[rightcount] = data[1];
+								if (data.length == headers.length) {
 
-						            for (var j=0; j<headers.length; j++) {
-								
-										CustomArrayBasic[i] = data[0];
-						                CustomArray[i][j]=data[j];																
+						            for (var j=0; j<headers.length; j++) {										
+										CustomArrayBasic[rightcount] = data[0];
+						                CustomArray[rightcount][j] = data[j];
 						            }					    
-						        }					
+						        }
+						        rightcount++;
+						    }					
+						}
+						var vNumAccounts = CustomParents.length;
+						CustomParents = CustomParents.filter(onlyUnique);
+						
+						var vNumAccountsClean = CustomParents.length;
+						
+						for(var cp2 = 0;cp2<vNumAccountsClean;cp2++){
+							CustomParents2[cp2] = new Array();							
+							var nncp2 = 0;
+							for(var cp3 = 0;cp3 < vNumAccounts;cp3++){
+								if(CustomArray[cp3][1] == CustomParents[cp2]){
+									CustomParents2[cp2][nncp2] = CustomArray[cp3][0];
+									nncp2++;
+									CustomParents2L[cp2] = nncp2;
+								}
 							}
-							
-							PaintTheNumbers();
-							RenderData();											    	
-				  		});		
+						}
+						
+						PaintTheNumbers();
+						RenderData();											    	
+			  		});		
 					
-				  return Items;
+				return Items;
 			};
+			
 			//Paint the numbers
 			function PaintTheNumbers(){
+		
 			if (vNumDims == 1) {
 				//apply the custom style
 				for (var nmrows = 0;nmrows <= lastrow;nmrows++) {
-									
+					//vComment = 0;			
 					vColumnText = ConceptMatrix[nmrows][0];
 					vGlobalComment = 0;
 					vGlobalCommentColor = "";
 					if (vColumnText != '-') {
 						
 					StyleTags = "";
+					StyleTags1 = "";
+					StyleTags2 = "";
+					StyleTags3 = "";
+					StyleTags4 = "";
+					StyleTags5 = "";
+					StyleTags6 = "";
+					StyleTags7 = "";
+					StyleTags8 = "";
+					StyleTags9 = "";
 					
 					if (vCustomFileBool) {
 					
@@ -1309,27 +1411,162 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						vGlobalFontSize = 0;
 						var aach = 0;
 						var vCustomAttribute = '';
-						StyleTags = "";	
+						StyleTags = "";
+						StyleTags1 = "";
+						StyleTags2 = "";
+						StyleTags3 = "";
+						StyleTags4 = "";
+						StyleTags5 = "";
+						StyleTags6 = "";
+						StyleTags7 = "";
+						StyleTags8 = "";
+						StyleTags9 = "";
+					
 						for(aach = 1;aach < vNumCustomHeaders;aach++){ // for each custom attribute allocated in the external csv
 							if (CustomArrayBasic.indexOf(vColumnText) < 0) {
 								vCustomAttribute == 'none';
 							}else{
 								vCustomAttribute = CustomArray[CustomArrayBasic.indexOf(vColumnText)][aach]; //CustomArrayBasic se ha rellenado con los atributos de look al principio de la ejecución del código
-							}														
-							ApplyBold(vCustomAttribute,vComas);
-							vComas += vGlobalComas;
-							ApplyComment(vCustomAttribute,vComas);
-							vComas += vGlobalComas;
-							ApplyFontStyle(vCustomAttribute,vComas);
-							vComas += vGlobalComas;
-							ApplyBackgroundColor(vCustomAttribute,vComas);
-							vComas += vGlobalComas;
-							ApplyFontColor(vCustomAttribute,vComas);
-							vComas += vGlobalComas;
-							ApplyFontSize(vCustomAttribute,vComas);
-							vComas += vGlobalComas;
-							ApplyAlignment(vCustomAttribute,vComas);
-							vComas += vGlobalComas;
+								var myJSON = JSON.stringify(CustomArray[CustomArrayBasic.indexOf(vColumnText)]);
+								if(myJSON.indexOf('<comment>') != -1){
+									vGlobalComment = 1;
+								}
+							}
+							var vEvalHeader = headers[aach].toUpperCase();
+							
+							switch (vEvalHeader)
+							{
+								case 'BOLD':
+								ApplyBold(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'COMMENT':								
+								ApplyComment(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'FONTSTYLE':
+								ApplyFontStyle(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'BACKGROUND':
+								ApplyBackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'LETTERCOLOR':								
+								ApplyFontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'SIZE':
+								ApplyFontSize(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'ALIGN':
+								ApplyAlignment(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP1BACKGROUND':
+								ApplyExp1BackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP1LETTERCOLOR':
+								ApplyExp1FontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP2BACKGROUND':
+								ApplyExp2BackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP2LETTERCOLOR':
+								ApplyExp2FontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP3BACKGROUND':
+								ApplyExp3BackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP3LETTERCOLOR':
+								ApplyExp3FontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP4BACKGROUND':
+								ApplyExp4BackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP4LETTERCOLOR':
+								ApplyExp4FontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP5BACKGROUND':
+								ApplyExp5BackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP5LETTERCOLOR':
+								ApplyExp5FontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP6BACKGROUND':
+								ApplyExp6BackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP6LETTERCOLOR':
+								ApplyExp6FontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP7BACKGROUND':
+								ApplyExp7BackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP7LETTERCOLOR':
+								ApplyExp7FontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP8BACKGROUND':
+								ApplyExp8BackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP8LETTERCOLOR':
+								ApplyExp8FontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP9BACKGROUND':
+								ApplyExp9BackgroundColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP9LETTERCOLOR':
+								ApplyExp9FontColor(vCustomAttribute,vComas);
+								vComas += vGlobalComas;
+								break;
+							
+								default:
+								
+								break;
+							}
+							
+																					
 						}
 						if (vGlobalFontSize == 0) {
 							if (vComas >0) {
@@ -1348,14 +1585,32 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						vFontSize = ';font-size:' + (14 + vLetterSize) + 'px';
 					}
 					
-					if (vPadding && vGlobalComas2 == 0) {
-						vPaddingText = '<span style="margin-left:15px;font-family:' + vFontFamily + '"></span>';
+					if ((vPadding && vGlobalComas2 == 0) || vCollapse) {
+						var vIndentPX = 0;
+						if(vCollapse){
+							vIndentPX = 10;
+						}
+						if(vPadding && vGlobalComas2 == 0){
+							vIndentPX = vIndentPX + 15;
+						}						
+						vPaddingText = '<span style="padding-left:' + vIndentPX + 'px;font-family:' + vFontFamily + '"></span>';
 					}else{
 						vPaddingText = "";
 					}
 					
-					//f += '<tr><td class="fdim-cells" style ="font-family:' + vFontFamily + ';' + StyleTags + ';width:230px' + vPaddingText + '">' + vColumnText + '</td>';
-					f += '<tr><td class="fdim-cells" style ="font-family:' + vFontFamily + ';' + StyleTags + ';width:230px">' + vPaddingText + vColumnText + '</td>';//';' + StyleTags + ;width:230px
+					var vCollapseCode = '';
+					if(vCollapse && CustomParents.indexOf(vColumnText) >= 0){
+						vCollapseCode = '<input class = "icon-minus" type = "image" src="/Extensions/PLSmartPivot/img/minus.png">';
+					}
+					
+					if(vApplyFootTags){
+						var indexOfFootTag = myFootNoteAux.indexOf(vColumnText + '(');
+						
+						if(indexOfFootTag >= 0){
+							vColumnText = myFootNoteAux.substring(indexOfFootTag,indexOfFootTag + 3 + vColumnText.length);							
+						}
+					}
+					f += '<tr><td class="fdim-cells" style ="font-family:' + vFontFamily + ';' + StyleTags + ';width:230px">' + vCollapseCode + vPaddingText + vColumnText + '</td>';//';' + StyleTags + ;width:230px
 					if (vGlobalComment == 1) {
 						if (vGlobalCommentColor == "") {
 							vGlobalCommentColor = 'white';
@@ -1436,9 +1691,12 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 									vColorSemaphoreText = vColorMetric3Text;
 								}
 							}
+							//aquí mismito es donde aplico los styletags de las measures
+							//tengo que crear nuevas columnas en el template para añadir black y color de measures							
 							f += '<td  class="grid-cells' + sufixCells + '" style ="font-family:' + vFontFamily + vFontSize + ';color:' + vColorSemaphoreText + ';background-color:' + vColorSemaphore + ';text-align:right;padding-left:4px">' + vColumnNum + '</td>';
 						}else{
-							f += '<td  class="grid-cells' + sufixCells + '" style ="font-family:' + vFontFamily + vFontSize + ';' + StyleTags + ';text-align:right;padding-left:4px">' + vColumnNum + '</td>';
+							var styleName = 'StyleTags' + nMeasures2;							
+							f += '<td  class="grid-cells' + sufixCells + '" style ="font-family:' + vFontFamily + vFontSize + ';' + eval(styleName) + ';text-align:right;padding-left:4px">' + vColumnNum + '</td>';
 						}						
 					}
 					}
@@ -1465,28 +1723,160 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						var aach2 = 0;
 						var vCustomAttribute2 = '';
 						StyleTags = "";
+						StyleTags1 = "";
+						StyleTags2 = "";
+						StyleTags3 = "";
+						StyleTags4 = "";
+						StyleTags5 = "";
+						StyleTags6 = "";
+						StyleTags7 = "";
+						StyleTags8 = "";
+						StyleTags9 = "";
 						
 						for(aach2 = 1;aach2 < vNumCustomHeaders;aach2++){ // for each attribute allocated in the external csv
 							
 							if (CustomArrayBasic.indexOf(vColumnText) < 0) {
 								vCustomAttribute2 == 'none';
 							}else{
-								vCustomAttribute2 = CustomArray[CustomArrayBasic.indexOf(vColumnText)][aach2]; //CustomArrayBasic has been filled with the custom attribute at the begining of the code						
+								vCustomAttribute2 = CustomArray[CustomArrayBasic.indexOf(vColumnText)][aach2]; //CustomArrayBasic has been filled with the custom attribute at the begining of the code	
+								var myJSON = JSON.stringify(CustomArray[CustomArrayBasic.indexOf(vColumnText)]);
+								if(myJSON.indexOf('<comment>') != -1){
+									vGlobalComment = 1;				
+								}
 							}																					
-							ApplyBold(vCustomAttribute2,vComas);
-							vComas += vGlobalComas;
-							ApplyComment(vCustomAttribute2,vComas);
-							vComas += vGlobalComas;
-							ApplyFontStyle(vCustomAttribute2,vComas);
-							vComas += vGlobalComas;
-							ApplyBackgroundColor(vCustomAttribute2,vComas);
-							vComas += vGlobalComas;
-							ApplyFontColor(vCustomAttribute2,vComas);
-							vComas += vGlobalComas;
-							ApplyFontSize(vCustomAttribute2,vComas);
-							vComas += vGlobalComas;
-							ApplyAlignment(vCustomAttribute2,vComas);
-							vComas += vGlobalComas;							
+							var vEvalHeader2 = headers[aach2].toUpperCase();
+							
+							switch (vEvalHeader2)
+							{
+								case 'BOLD':
+								ApplyBold(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'COMMENT':
+								ApplyComment(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'FONTSTYLE':
+								ApplyFontStyle(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'BACKGROUND':
+								ApplyBackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'LETTERCOLOR':
+								ApplyFontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'SIZE':
+								ApplyFontSize(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'ALIGN':
+								ApplyAlignment(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP1BACKGROUND':
+								ApplyExp1BackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP1LETTERCOLOR':
+								ApplyExp1FontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP2BACKGROUND':
+								ApplyExp2BackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP2LETTERCOLOR':
+								ApplyExp2FontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP3BACKGROUND':
+								ApplyExp3BackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP3LETTERCOLOR':
+								ApplyExp3FontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP4BACKGROUND':
+								ApplyExp4BackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP4LETTERCOLOR':
+								ApplyExp4FontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP5BACKGROUND':
+								ApplyExp5BackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP5LETTERCOLOR':
+								ApplyExp5FontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP6BACKGROUND':
+								ApplyExp6BackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP6LETTERCOLOR':
+								ApplyExp6FontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP7BACKGROUND':
+								ApplyExp7BackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP7LETTERCOLOR':
+								ApplyExp7FontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP8BACKGROUND':
+								ApplyExp8BackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP8LETTERCOLOR':
+								ApplyExp8FontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP9BACKGROUND':
+								ApplyExp9BackgroundColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+
+								case 'EXP9LETTERCOLOR':
+								ApplyExp9FontColor(vCustomAttribute2,vComas);
+								vComas += vGlobalComas;
+								break;
+							
+								default:
+								
+								break;
+							}			
 						}
 						if (vGlobalFontSize == 0) {
 							if (vComas > 0) {
@@ -1505,12 +1895,25 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						vFontSize = ';font-size:' + (14 + vLetterSize) + 'px';
 					}
 					
-					if (vPadding && vGlobalComas2 == 0) {
-						vPaddingText = '<span style="margin-left:15px;font-family:' + vFontFamily + '"></span>';
+					if ((vPadding && vGlobalComas2 == 0) || vCollapse) {
+						var vIndentPX = 0;
+						if(vCollapse){
+							vIndentPX = 10;
+						}
+						if(vPadding && vGlobalComas2 == 0){
+							vIndentPX = vIndentPX + 15;
+						}
+						vPaddingText = '<span style="padding-left:' + vIndentPX + 'px;font-family:' + vFontFamily + '"></span>';
 					}else{
 						vPaddingText = "";
 					}
-					f += '<tr><td class="fdim-cells" style ="font-family:' + vFontFamily + ';' + StyleTags + ';width:230px">' + vPaddingText + vColumnText + '</td>';
+					var vCollapseCode = '';
+					if(vCollapse && CustomParents.indexOf(vColumnText) >= 0){
+						vCollapseCode = '<input class = "icon-minus" type = "image" src="/Extensions/PLSmartPivot/img/minus.png">';
+					}
+				
+					f += '<tr><td class="fdim-cells" style ="font-family:' + vFontFamily + ';' + StyleTags + ';width:230px">' + vCollapseCode + vPaddingText + vColumnText + '</td>';
+					//f += '<tr><td class="fdim-cells" style ="font-family:' + vFontFamily + ';' + StyleTags + ';width:230px">' + vPaddingText + vColumnText + '</td>';
 					if (vGlobalComment == 1) {
 						if (vGlobalCommentColor == "") {
 							vGlobalCommentColor = 'white';
@@ -1525,11 +1928,11 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 					var nMeasure72 = -1;
 					var nMeasure72Semaphore = 0;
 					
-					for(var nMeasures22 = 1;nMeasures22 <= vNumMeasures2;nMeasures22++){
-						
+					for(var nMeasures22 = 1;nMeasures22 <= vNumMeasures2;nMeasures22++){						
 						nMeasAux = nMeasure72Semaphore;
 						nMeasure7++;
 						nMeasure72++;
+						
 						if (vColumnText.substring(0, 1) == '%') {
 							vColumnNum = ApplyPreMask('0,00%', ConceptMatrixPivot[nmrows2][nMeasures22]);
 							var vSpecialF = '0,00%';
@@ -1617,10 +2020,13 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 								f += '<td class="grid-cells' + sufixCells + '" style ="font-family:' + vFontFamily + vFontSize + ';color:' + vColorSemaphoreText + ';background-color:' + vColorSemaphore + ';text-align:right;padding-left:4px">' + vColumnNum + '</td>';
 							}
 						}else{
+							
+							var styleName = 'StyleTags' + nMeasure7;							
+							//f += '<td  class="grid-cells' + sufixCells + '" style ="font-family:' + vFontFamily + vFontSize + ';' + eval(styleName) + ';text-align:right;padding-left:4px">' + vColumnNum + '</td>';
 							if (vSpecialF.substring(vSpecialF.length - 1) == '%' && vNumMeasures > 1) {
-								f += '<td class="grid-cells-small' + sufixCells + '" style ="font-family:' + vFontFamily + ';' + StyleTags + ';text-align:right;padding-right:4px">' + vColumnNum + '</td>';
+								f += '<td class="grid-cells-small' + sufixCells + '" style ="font-family:' + vFontFamily + ';' + eval(styleName) + ';text-align:right;padding-right:4px">' + vColumnNum + '</td>';
 							}else{
-								f += '<td class="grid-cells' + sufixCells + '" style ="font-family:' + vFontFamily + ';' + StyleTags + ';text-align:right;padding-right:4px">' + vColumnNum + '</td>';
+								f += '<td class="grid-cells' + sufixCells + '" style ="font-family:' + vFontFamily + ';' + eval(styleName) + ';text-align:right;padding-right:4px">' + vColumnNum + '</td>';
 							}
 						}
 						
@@ -1649,10 +2055,10 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			f += "</div>";
 			
 			// freeze header and first column
-			var x="<div class='kpi-table'>";
+			var x="<div id = 'kpi-table-id' class='kpi-table'>";
 			x+=f,
 			x+="</div>",
-			x+="<div class='data-table'>",
+			x+="<div id = 'data-table-id' class='data-table'>",
 			x+=f,
 			x+="</div>",
 			
@@ -1696,8 +2102,10 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 			
 			//allow making selections inside the table
 			e(".data-table td").on("click",function(){
-				if (self.backendApi.model.layout.filteroncellclick == false)
+				
+				if (self.backendApi.model.layout.filteroncellclick == false)					
 					return;
+			
 				var indextr = e(this).parent().parent().children().index(e(this).parent()); //identifica la row
 				var indextd = e(this).parent().children().index(e(this)); //identifica la col
 				
@@ -1716,24 +2124,23 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				if(vNumDims > 1 && indextd > 0){
 					if (ArrayGetSelectedCount[1] > 0) {
 						
-						var SelectB = JSON.parse(JSON.stringify(ConceptMatrixColElemTable));						
-						self.backendApi.selectValues(1,SelectB,true);
-						e(this).toggleClass("selected");							
+						var SelectB = JSON.parse(JSON.stringify(ConceptMatrixColElemTable));	
+						self.backendApi.selectValues(1,SelectB,false);
+						e(this).toggleClass("selected");					
 					}
 					SelectCol = ConceptMatrixColElemTable[(indextd)];
-					
-					self.backendApi.selectValues(1,[SelectCol],true);
+					self.backendApi.selectValues(1,[SelectCol],false);
 					e(this).toggleClass("selected");						
 				}
 				
-				if (indextd > 0 && ArrayGetSelectedCount[0] > 0) {
+				if (indextd > 0 && ArrayGetSelectedCount[0] > 0) {					
 					var SelectA = JSON.parse(JSON.stringify(ConceptMatrixRowElem));
-					self.backendApi.selectValues(0,SelectA,true);
+					self.backendApi.selectValues(0,SelectA,false);
 					e(this).toggleClass("selected");
 				}
 				
-				if (indextd > 0) {
-					self.backendApi.selectValues(0,[SelectRow],true);
+				if (indextd > 0) {					
+					self.backendApi.selectValues(0,[SelectRow],false);
 					e(this).toggleClass("selected");
 				}
 		        }),
@@ -1745,56 +2152,117 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				var SelectCol = 0;
 										 
 				if(vNumDims > 1 && indextd > 0){
-					if (ArrayGetSelectedCount[1] > 0) {
-						
+					/*if (ArrayGetSelectedCount[1] > 0) {						
 						var SelectB = JSON.parse(JSON.stringify(ConceptMatrixColElem));
 						self.backendApi.selectValues(1,SelectB,true);
-						e(this).toggleClass("selected");							
-					}
+						e(this).toggleClass("selected");
+					}*/
 					if (vSeparatorCols) {
-						SelectCol = ConceptMatrixColElem[(Math.round(indextd/2) - 1)];	
+						SelectCol = ConceptMatrixColElem[(Math.round(indextd/2) - 1)];
 					}else{
-						SelectCol = ConceptMatrixColElem[(Math.round(indextd) - 1)];	
+						SelectCol = ConceptMatrixColElem[(Math.round(indextd) - 1)];
 					}
 					
-					self.backendApi.selectValues(1,[SelectCol],true);
-					e(this).toggleClass("selected");						
-				}				
-			}),
-			//allow selections in desc dimension cells
-			e(".kpi-table td").on("click",function(){				
-				var indextr = e(this).parent().parent().children().index(e(this).parent()); //identifica la row				
-				var SelectRow = 0;
-				SelectRow = ConceptMatrixRowElem[(indextr)];
-				
-				if (ArrayGetSelectedCount[0] > 0) {
-					var SelectA = JSON.parse(JSON.stringify(ConceptMatrixRowElem));
-					self.backendApi.selectValues(0,SelectA,true);
+					self.backendApi.selectValues(1,[SelectCol],false);
 					e(this).toggleClass("selected");
 				}
-								
-				self.backendApi.selectValues(0,[SelectRow],true);
-				e(this).toggleClass("selected");
-				
 			}),
-			e(".icon-xls").on("click",function(){				
-				e(".header-wrapper th").children(".tooltip").remove();// remove some popup effects when exporting
-				e(".header-wrapper th").children(".icon-xls").remove();// remove the xls icon when exporting 
-				if (isChrome || isSafari) {
+			//allow selections in desc dimension cells
+			e(".kpi-table td").on("click",function(){	
+				if (self.backendApi.model.layout.filteroncellclick == false)					
+					return;
+				var indextr = e(this).parent().parent().children().index(e(this).parent()); //identifica la row	
+				var SelectRow = 0;
+				SelectRow = ConceptMatrixRowElem[(indextr)];				
+				if(!vIconPlus && !vIconMinus){										
+					self.backendApi.selectValues(0,[SelectRow],false);
+					e(this).toggleClass("selected");
+				}else{
+					if(vIconMinus){
+						var myRowP = e(this).children()[0];
 					
-					var $clonedDiv = e('.data-table').clone(true);//.kpi-table a secas exporta la 1ªcol				
+						var testMinus = myRowP.src;
+						if(testMinus.indexOf('minus.png') >= 0){
+							
+							myRowP.src = myRowP.src.replace('minus','plus');
+							
+							var indexParent = CustomParents.indexOf(e(this)[0].innerText);
+							
+							ArrayOff = [];
+							loadChildsOff(indexParent);
+																			
+							for (var vOff = 0;vOff < ArrayOff.length;vOff++){
+								var myRowC1 = e(this).parent().parent().children()[ArrayOff[vOff]];
+								var myRowC2 = e(".data-table td").parent().parent().children()[ArrayOff[vOff]];							
+								myRowC1.hidden = true;
+								myRowC2.hidden = true;
+							}
+														
+						}else{
+							
+							myRowP.src = myRowP.src.replace('plus','minus');
+
+							var indexParent = CustomParents.indexOf(e(this)[0].innerText);
+							ArrayOff = [];
+							loadChildsOff(indexParent);
+							
+							for (var vOff = 0;vOff < ArrayOff.length;vOff++){
+								var myRowC1 = e(this).parent().parent().children()[ArrayOff[vOff]];
+								var myRowC2 = e(".data-table td").parent().parent().children()[ArrayOff[vOff]];							
+								myRowC1.hidden = false;
+								myRowC2.hidden = false;																								
+							}
+							var ArrayOff2 = ArrayOff;
+
+							for (var vOff = 0;vOff < ArrayOff2.length;vOff++){
+							
+								var myRowPM = e(".kpi-table td").parent().parent().children()[ArrayOff2[vOff]];
+								
+								var testPlus = myRowPM.innerHTML;
+
+								if(testPlus.indexOf('plus.png') >= 0){
+									var indexParentPlus = CustomParents.indexOf(myRowPM.innerText);
+									ArrayOff = [];
+									loadChildsOff(indexParentPlus);
+									
+									for (var vOff2 = 0;vOff2 < ArrayOff.length;vOff2++){
+										var myRowC21 = e(this).parent().parent().children()[ArrayOff[vOff2]];
+										var myRowC22 = e(".data-table td").parent().parent().children()[ArrayOff[vOff2]];							
+										myRowC21.hidden = true;
+										myRowC22.hidden = true;
+									}
+								}
+							}
+														
+						}
+						vIconMinus = false;
+					}										
+				}				
+			}),
+			e(".icon-minus").on("click",function(){				
+				vIconMinus = true;
+			}),
+			
+			e(".icon-xls").on("click",function(){	
+				e(".header-wrapper th").children(".tooltip").remove();// remove some popup effects when exporting
+				e(".header-wrapper th").children(".icon-xls").remove();// remove the xls icon when exporting
+				
+				if (isChrome || isSafari) {
+					var $clonedDiv = e('.data-table').clone(true);//.kpi-table a secas exporta la 1ªcol
 					var vEncodeHead = '<html><head><meta charset="UTF-8"></head>';
-					vEncodeHead += myTitle + mySubTitle + myFootNote;
+					var vEncodeFoot = '<br>';
+				
+					vEncodeHead += myTitle + mySubTitle;
 					var vEncode = encodeURIComponent($clonedDiv.html());
-					var vDecode = vEncodeHead + vEncode + '</html>';
+					vEncodeFoot += myFootNote;
+					var vDecode = vEncodeHead + vEncode + vEncodeFoot + '</html>';
 					
 					$clonedDiv.find("tr.header");
 					vDecode = vDecode.split('%3E.%3C').join('%3E%3C');
-					window.open('data:application/vnd.ms-excel,' +vDecode);
+					window.open('data:application/vnd.ms-excel,' + vDecode);
 					e.preventDefault();
 				}
 				if (isIE){
-					
 					var a='<html><head><meta charset="UTF-8"></head>';
 					a += myTitle + mySubTitle + myFootNote;
 					a += f;
@@ -1810,7 +2278,6 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				}
 				
 				if (isFirefox) {
-				
 					var $clonedDiv = e('.data-table').clone(true);//.kpi-table a secas exporta la 1ªcol				
 					var vEncodeHead = '<html><head><meta charset="UTF-8"></head>';
 					vEncodeHead += myTitle + mySubTitle + myFootNote;
@@ -1856,7 +2323,16 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				switch (vCustomAttributes)
 				{
 					case '<bold>':
-					StyleTags += vPuntoComa + 'font-weight:bold';
+					StyleTags  += vPuntoComa + 'font-weight:bold';
+					StyleTags1 += vPuntoComa + 'font-weight:bold';
+					StyleTags2 += vPuntoComa + 'font-weight:bold';
+					StyleTags3 += vPuntoComa + 'font-weight:bold';
+					StyleTags4 += vPuntoComa + 'font-weight:bold';
+					StyleTags5 += vPuntoComa + 'font-weight:bold';
+					StyleTags6 += vPuntoComa + 'font-weight:bold';
+					StyleTags7 += vPuntoComa + 'font-weight:bold';
+					StyleTags8 += vPuntoComa + 'font-weight:bold';
+					StyleTags9 += vPuntoComa + 'font-weight:bold';
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					break;
@@ -1879,6 +2355,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				
 					default:
 					StyleTags += '';
+					StyleTags1 += '';
+					StyleTags2 += '';
+					StyleTags3 += '';
+					StyleTags4 += '';
+					StyleTags5 += '';
+					StyleTags6 += '';
+					StyleTags7 += '';
+					StyleTags8 += '';
+					StyleTags9 += '';
 					break;
 				}
 			}
@@ -1891,12 +2376,30 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				{
 					case '<italic>':
 					StyleTags += vPuntoComa + 'font-style:italic';
+					StyleTags1 += vPuntoComa + 'font-style:italic';
+					StyleTags2 += vPuntoComa + 'font-style:italic';
+					StyleTags3 += vPuntoComa + 'font-style:italic';
+					StyleTags4 += vPuntoComa + 'font-style:italic';
+					StyleTags5 += vPuntoComa + 'font-style:italic';
+					StyleTags6 += vPuntoComa + 'font-style:italic';
+					StyleTags7 += vPuntoComa + 'font-style:italic';
+					StyleTags8 += vPuntoComa + 'font-style:italic';
+					StyleTags9 += vPuntoComa + 'font-style:italic';
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					break;
 				
 					case '<oblique>':
 					StyleTags += vPuntoComa + 'font-style:oblique';
+					StyleTags1 += vPuntoComa + 'font-style:oblique';
+					StyleTags2 += vPuntoComa + 'font-style:oblique';
+					StyleTags3 += vPuntoComa + 'font-style:oblique';
+					StyleTags4 += vPuntoComa + 'font-style:oblique';
+					StyleTags5 += vPuntoComa + 'font-style:oblique';
+					StyleTags6 += vPuntoComa + 'font-style:oblique';
+					StyleTags7 += vPuntoComa + 'font-style:oblique';
+					StyleTags8 += vPuntoComa + 'font-style:oblique';
+					StyleTags9 += vPuntoComa + 'font-style:oblique';
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					break;
@@ -1915,6 +2418,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				{
 					case '<dark>':
 					StyleTags += vPuntoComa + 'background-color:' + vColLibDark;
+					StyleTags1 += vPuntoComa + 'background-color:' + vColLibDark;
+					StyleTags2 += vPuntoComa + 'background-color:' + vColLibDark;
+					StyleTags3 += vPuntoComa + 'background-color:' + vColLibDark;
+					StyleTags4 += vPuntoComa + 'background-color:' + vColLibDark;
+					StyleTags5 += vPuntoComa + 'background-color:' + vColLibDark;
+					StyleTags6 += vPuntoComa + 'background-color:' + vColLibDark;
+					StyleTags7 += vPuntoComa + 'background-color:' + vColLibDark;
+					StyleTags8 += vPuntoComa + 'background-color:' + vColLibDark;
+					StyleTags9 += vPuntoComa + 'background-color:' + vColLibDark;
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					vGlobalCommentColor = vColLibDark;
@@ -1922,6 +2434,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				
 					case '<night>':
 					StyleTags += vPuntoComa + 'background-color:' + vColLibNight;
+					StyleTags1 += vPuntoComa + 'background-color:' + vColLibNight;
+					StyleTags2 += vPuntoComa + 'background-color:' + vColLibNight;
+					StyleTags3 += vPuntoComa + 'background-color:' + vColLibNight;
+					StyleTags4 += vPuntoComa + 'background-color:' + vColLibNight;
+					StyleTags5 += vPuntoComa + 'background-color:' + vColLibNight;
+					StyleTags6 += vPuntoComa + 'background-color:' + vColLibNight;
+					StyleTags7 += vPuntoComa + 'background-color:' + vColLibNight;
+					StyleTags8 += vPuntoComa + 'background-color:' + vColLibNight;
+					StyleTags9 += vPuntoComa + 'background-color:' + vColLibNight;
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					vGlobalCommentColor = vColLibNight;
@@ -1929,6 +2450,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						
 					case '<soft>':
 					StyleTags += vPuntoComa + 'background-color:' + vColLibSoft;
+					StyleTags1 += vPuntoComa + 'background-color:' + vColLibSoft;
+					StyleTags2 += vPuntoComa + 'background-color:' + vColLibSoft;
+					StyleTags3 += vPuntoComa + 'background-color:' + vColLibSoft;
+					StyleTags4 += vPuntoComa + 'background-color:' + vColLibSoft;
+					StyleTags5 += vPuntoComa + 'background-color:' + vColLibSoft;
+					StyleTags6 += vPuntoComa + 'background-color:' + vColLibSoft;
+					StyleTags7 += vPuntoComa + 'background-color:' + vColLibSoft;
+					StyleTags8 += vPuntoComa + 'background-color:' + vColLibSoft;
+					StyleTags9 += vPuntoComa + 'background-color:' + vColLibSoft;
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					vGlobalCommentColor = vColLibSoft;
@@ -1936,6 +2466,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						
 					case '<red>':
 					StyleTags += vPuntoComa + 'background-color:' + vColLibRed;
+					StyleTags1 += vPuntoComa + 'background-color:' + vColLibRed;
+					StyleTags2 += vPuntoComa + 'background-color:' + vColLibRed;
+					StyleTags3 += vPuntoComa + 'background-color:' + vColLibRed;
+					StyleTags4 += vPuntoComa + 'background-color:' + vColLibRed;
+					StyleTags5 += vPuntoComa + 'background-color:' + vColLibRed;
+					StyleTags6 += vPuntoComa + 'background-color:' + vColLibRed;
+					StyleTags7 += vPuntoComa + 'background-color:' + vColLibRed;
+					StyleTags8 += vPuntoComa + 'background-color:' + vColLibRed;
+					StyleTags9 += vPuntoComa + 'background-color:' + vColLibRed;
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					vGlobalCommentColor = vColLibRed;
@@ -1943,6 +2482,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						
 					case '<orange>':
 					StyleTags += vPuntoComa + 'background-color:' + vColLibOrange;
+					StyleTags1 += vPuntoComa + 'background-color:' + vColLibOrange;
+					StyleTags2 += vPuntoComa + 'background-color:' + vColLibOrange;
+					StyleTags3 += vPuntoComa + 'background-color:' + vColLibOrange;
+					StyleTags4 += vPuntoComa + 'background-color:' + vColLibOrange;
+					StyleTags5 += vPuntoComa + 'background-color:' + vColLibOrange;
+					StyleTags6 += vPuntoComa + 'background-color:' + vColLibOrange;
+					StyleTags7 += vPuntoComa + 'background-color:' + vColLibOrange;
+					StyleTags8 += vPuntoComa + 'background-color:' + vColLibOrange;
+					StyleTags9 += vPuntoComa + 'background-color:' + vColLibOrange;
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					vGlobalCommentColor = vColLibOrange;
@@ -1950,6 +2498,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						
 					case '<violete>':
 					StyleTags += vPuntoComa + 'background-color:' + vColLibViolete;
+					StyleTags1 += vPuntoComa + 'background-color:' + vColLibViolete;
+					StyleTags2 += vPuntoComa + 'background-color:' + vColLibViolete;
+					StyleTags3 += vPuntoComa + 'background-color:' + vColLibViolete;
+					StyleTags4 += vPuntoComa + 'background-color:' + vColLibViolete;
+					StyleTags5 += vPuntoComa + 'background-color:' + vColLibViolete;
+					StyleTags6 += vPuntoComa + 'background-color:' + vColLibViolete;
+					StyleTags7 += vPuntoComa + 'background-color:' + vColLibViolete;
+					StyleTags8 += vPuntoComa + 'background-color:' + vColLibViolete;
+					StyleTags9 += vPuntoComa + 'background-color:' + vColLibViolete;
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					vGlobalCommentColor = vColLibViolete;
@@ -1957,6 +2514,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				
 					case '<blue>':
 					StyleTags += vPuntoComa + 'background-color:' + vColLibBlue;
+					StyleTags1 += vPuntoComa + 'background-color:' + vColLibBlue;
+					StyleTags2 += vPuntoComa + 'background-color:' + vColLibBlue;
+					StyleTags3 += vPuntoComa + 'background-color:' + vColLibBlue;
+					StyleTags4 += vPuntoComa + 'background-color:' + vColLibBlue;
+					StyleTags5 += vPuntoComa + 'background-color:' + vColLibBlue;
+					StyleTags6 += vPuntoComa + 'background-color:' + vColLibBlue;
+					StyleTags7 += vPuntoComa + 'background-color:' + vColLibBlue;
+					StyleTags8 += vPuntoComa + 'background-color:' + vColLibBlue;
+					StyleTags9 += vPuntoComa + 'background-color:' + vColLibBlue;
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					vGlobalCommentColor = vColLibBlue;
@@ -1964,17 +2530,37 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				
 					case '<green>':
 					StyleTags += vPuntoComa + 'background-color:' + vColLibGreen;
+					StyleTags1 += vPuntoComa + 'background-color:' + vColLibGreen;
+					StyleTags2 += vPuntoComa + 'background-color:' + vColLibGreen;
+					StyleTags3 += vPuntoComa + 'background-color:' + vColLibGreen;
+					StyleTags4 += vPuntoComa + 'background-color:' + vColLibGreen;
+					StyleTags5 += vPuntoComa + 'background-color:' + vColLibGreen;
+					StyleTags6 += vPuntoComa + 'background-color:' + vColLibGreen;
+					StyleTags7 += vPuntoComa + 'background-color:' + vColLibGreen;
+					StyleTags8 += vPuntoComa + 'background-color:' + vColLibGreen;
+					StyleTags9 += vPuntoComa + 'background-color:' + vColLibGreen;
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
 					vGlobalCommentColor = vColLibGreen;
 					break;
 				
 					default:
-					if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
-						StyleTags += vPuntoComa + 'background-color:' + vCustomAttributes;
-						vGlobalComas = 1;
-						vGlobalComas2 = 1;
-						vGlobalCommentColor = vCustomAttributes;						
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags += vPuntoComa + 'background-color:' + vCustomAttributes;
+							StyleTags1 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							StyleTags2 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							StyleTags3 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							StyleTags4 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							StyleTags5 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							StyleTags6 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							StyleTags7 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							StyleTags8 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							StyleTags9 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;
+							vGlobalComas2 = 1;
+							vGlobalCommentColor = vCustomAttributes;						
+						}
 					}
 					break;
 				}				
@@ -1989,13 +2575,66 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 					case '<white>':
 					if (vGlobalComment == 0) {
 						StyleTags += vPuntoComa + 'color:white';
+						StyleTags1 += vPuntoComa + 'color:white';
+						StyleTags2 += vPuntoComa + 'color:white';
+						StyleTags3 += vPuntoComa + 'color:white';
+						StyleTags4 += vPuntoComa + 'color:white';
+						StyleTags5 += vPuntoComa + 'color:white';
+						StyleTags6 += vPuntoComa + 'color:white';
+						StyleTags7 += vPuntoComa + 'color:white';
+						StyleTags8 += vPuntoComa + 'color:white';
+						StyleTags9 += vPuntoComa + 'color:white';
 						vGlobalComas = 1;
-						vGlobalComas2 = 1;
-						break;
-					}					
-				
+						//vGlobalComas2 = 1;						
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags += vPuntoComa + 'color:black';
+						StyleTags1 += vPuntoComa + 'color:black';
+						StyleTags2 += vPuntoComa + 'color:black';
+						StyleTags3 += vPuntoComa + 'color:black';
+						StyleTags4 += vPuntoComa + 'color:black';
+						StyleTags5 += vPuntoComa + 'color:black';
+						StyleTags6 += vPuntoComa + 'color:black';
+						StyleTags7 += vPuntoComa + 'color:black';
+						StyleTags8 += vPuntoComa + 'color:black';
+						StyleTags9 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;
+						//vGlobalComas2 = 1;												
+					}
+					break;
+					
 					default:
-					StyleTags += '';
+					if(vCustomAttributes && vGlobalComment == 0){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags += vPuntoComa + 'color:' + vCustomAttributes;
+							StyleTags1 += vPuntoComa + 'color:' + vCustomAttributes;
+							StyleTags2 += vPuntoComa + 'color:' + vCustomAttributes;
+							StyleTags3 += vPuntoComa + 'color:' + vCustomAttributes;
+							StyleTags4 += vPuntoComa + 'color:' + vCustomAttributes;
+							StyleTags5 += vPuntoComa + 'color:' + vCustomAttributes;
+							StyleTags6 += vPuntoComa + 'color:' + vCustomAttributes;
+							StyleTags7 += vPuntoComa + 'color:' + vCustomAttributes;
+							StyleTags8 += vPuntoComa + 'color:' + vCustomAttributes;
+							StyleTags9 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;
+							//vGlobalComas2 = 1;												
+						}
+					}else{
+						if(vGlobalComment == 1){
+							StyleTags1 += vPuntoComa + 'color:transparent';
+							StyleTags2 += vPuntoComa + 'color:transparent';
+							StyleTags3 += vPuntoComa + 'color:transparent';
+							StyleTags4 += vPuntoComa + 'color:transparent';
+							StyleTags5 += vPuntoComa + 'color:transparent';
+							StyleTags6 += vPuntoComa + 'color:transparent';
+							StyleTags7 += vPuntoComa + 'color:transparent';
+							StyleTags8 += vPuntoComa + 'color:transparent';
+							StyleTags9 += vPuntoComa + 'color:transparent';
+							vGlobalComas = 1;
+						}
+					}			
 					break;
 				}
 			}
@@ -2008,6 +2647,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				{
 					case '<large>':
 					StyleTags += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
+					StyleTags1 += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
+					StyleTags2 += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
+					StyleTags3 += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
+					StyleTags4 += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
+					StyleTags5 += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
+					StyleTags6 += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
+					StyleTags7 += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
+					StyleTags8 += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
+					StyleTags9 += vPuntoComa + 'font-size:' + (15 + vLetterSize) + 'px';
 					vFontSize = ';font-size:' + (15 + vLetterSize) + 'px';
 					vGlobalComas = 1;
 					vGlobalComas2 = 1;
@@ -2016,6 +2664,15 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 						
 					case '<medium>':
 					StyleTags += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
+					StyleTags1 += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
+					StyleTags2 += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
+					StyleTags3 += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
+					StyleTags4 += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
+					StyleTags5 += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
+					StyleTags6 += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
+					StyleTags7 += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
+					StyleTags8 += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
+					StyleTags9 += vPuntoComa + 'font-size:' + (14 + vLetterSize)+ 'px';
 					vFontSize = ';font-size:' + (14 + vLetterSize) + 'px';
 					vGlobalComas = 1;
 					vMedium == true;
@@ -2024,9 +2681,18 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 							
 					case '<small>':
 					StyleTags += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
+					StyleTags1 += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
+					StyleTags2 += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
+					StyleTags3 += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
+					StyleTags4 += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
+					StyleTags5 += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
+					StyleTags6 += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
+					StyleTags7 += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
+					StyleTags8 += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
+					StyleTags9 += vPuntoComa + 'font-size:' + (13 + vLetterSize)+ 'px';
 					vFontSize = ';font-size:' + (13 + vLetterSize) + 'px';
 					vGlobalComas = 1;
-					vGlobalComas2 = 1;
+					//vGlobalComas2 = 1;
 					vGlobalFontSize = 1;
 					break;
 				
@@ -2044,8 +2710,17 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				{
 					case '<center>':
 					StyleTags += vPuntoComa + 'text-align:center';
+					StyleTags1 += vPuntoComa + 'text-align:center';
+					StyleTags2 += vPuntoComa + 'text-align:center';
+					StyleTags3 += vPuntoComa + 'text-align:center';
+					StyleTags4 += vPuntoComa + 'text-align:center';
+					StyleTags5 += vPuntoComa + 'text-align:center';
+					StyleTags6 += vPuntoComa + 'text-align:center';
+					StyleTags7 += vPuntoComa + 'text-align:center';
+					StyleTags8 += vPuntoComa + 'text-align:center';
+					StyleTags9 += vPuntoComa + 'text-align:center';
 					vGlobalComas = 1;
-					vGlobalComas2 = 1;
+					//vGlobalComas2 = 1;
 					break;
 				
 					default:
@@ -2053,10 +2728,433 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 					break;
 				}
 			}
+			function ApplyExp1BackgroundColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{					
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags1 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;						
+							vGlobalCommentColor = vCustomAttributes;						
+						}
+					}
+					break;
+				}				
+			}
+			function ApplyExp2BackgroundColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{					
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags2 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;						
+							vGlobalCommentColor = vCustomAttributes;						
+						}
+					}
+					break;
+				}				
+			}
+			function ApplyExp3BackgroundColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{					
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags3 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;						
+							vGlobalCommentColor = vCustomAttributes;						
+						}
+					}
+					break;
+				}				
+			}
+			function ApplyExp4BackgroundColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{					
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags4 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;						
+							vGlobalCommentColor = vCustomAttributes;						
+						}
+					}
+					break;
+				}				
+			}
+			function ApplyExp5BackgroundColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{					
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags5 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;						
+							vGlobalCommentColor = vCustomAttributes;						
+						}
+					}
+					break;
+				}				
+			}
+			function ApplyExp6BackgroundColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{					
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags6 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;						
+							vGlobalCommentColor = vCustomAttributes;						
+						}
+					}
+					break;
+				}				
+			}
+			function ApplyExp7BackgroundColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{					
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags7 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;						
+							vGlobalCommentColor = vCustomAttributes;						
+						}
+					}
+					break;
+				}				
+			}
+			function ApplyExp8BackgroundColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{					
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags8 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;						
+							vGlobalCommentColor = vCustomAttributes;						
+						}
+					}
+					break;
+				}				
+			}
+			function ApplyExp9BackgroundColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{					
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags9 += vPuntoComa + 'background-color:' + vCustomAttributes;
+							vGlobalComas = 1;						
+							vGlobalCommentColor = vCustomAttributes;						
+						}
+					}
+					break;
+				}				
+			}
+			function ApplyExp1FontColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{
+					case '<white>':
+					if (vGlobalComment == 0) {
+						StyleTags1 += vPuntoComa + 'color:white';
+						vGlobalComas = 1;										
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags1 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;																		
+					}
+					break;
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags1 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;																		
+						}
+					}			
+					break;
+				}
+			}
+			function ApplyExp2FontColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{
+					case '<white>':
+					if (vGlobalComment == 0) {
+						StyleTags2 += vPuntoComa + 'color:white';
+						vGlobalComas = 1;										
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags2 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;																		
+					}
+					break;
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags2 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;																		
+						}
+					}			
+					break;
+				}
+			}
+			function ApplyExp3FontColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{
+					case '<white>':
+					if (vGlobalComment == 0) {
+						StyleTags3 += vPuntoComa + 'color:white';
+						vGlobalComas = 1;										
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags3 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;																		
+					}
+					break;
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags3 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;																		
+						}	
+					}			
+					break;
+				}
+			}
+			function ApplyExp4FontColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{
+					case '<white>':
+					if (vGlobalComment == 0) {
+						StyleTags4 += vPuntoComa + 'color:white';
+						vGlobalComas = 1;										
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags4 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;																		
+					}
+					break;
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags4 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;																		
+						}	
+					}			
+					break;
+				}
+			}
+			function ApplyExp5FontColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{
+					case '<white>':
+					if (vGlobalComment == 0) {
+						StyleTags5 += vPuntoComa + 'color:white';
+						vGlobalComas = 1;										
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags5 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;																		
+					}
+					break;
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags5 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;																		
+						}	
+					}			
+					break;
+				}
+			}
+			function ApplyExp6FontColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{
+					case '<white>':
+					if (vGlobalComment == 0) {
+						StyleTags6 += vPuntoComa + 'color:white';
+						vGlobalComas = 1;										
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags6 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;																		
+					}
+					break;
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags6 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;																		
+						}
+					}				
+					break;
+				}
+			}
+			function ApplyExp7FontColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{
+					case '<white>':
+					if (vGlobalComment == 0) {
+						StyleTags7 += vPuntoComa + 'color:white';
+						vGlobalComas = 1;										
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags7 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;																		
+					}
+					break;
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags7 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;																		
+						}	
+					}			
+					break;
+				}
+			}
+			function ApplyExp8FontColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{
+					case '<white>':
+					if (vGlobalComment == 0) {
+						StyleTags8 += vPuntoComa + 'color:white';
+						vGlobalComas = 1;										
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags8 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;																		
+					}
+					break;
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags8 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;																		
+						}	
+					}			
+					break;
+				}
+			}
+			function ApplyExp9FontColor(vCustomAttributes,vCustomComas){				
+				var vPuntoComa = '';
+				if (vCustomComas>0) {
+					vPuntoComa = ';';
+				}
+				switch (vCustomAttributes)
+				{
+					case '<white>':
+					if (vGlobalComment == 0) {
+						StyleTags9 += vPuntoComa + 'color:white';
+						vGlobalComas = 1;										
+					}										
+					break;
+					case '<black>':
+					if (vGlobalComment == 0) {
+						StyleTags9 += vPuntoComa + 'color:black';
+						vGlobalComas = 1;																		
+					}
+					break;
+					default:
+					if(vCustomAttributes){
+						if (vCustomAttributes.substring(0, 1) == '#' || vCustomAttributes.substring(0, 3).toUpperCase() == 'RGB') {
+							StyleTags9 += vPuntoComa + 'color:' + vCustomAttributes;
+							vGlobalComas = 1;																		
+						}	
+					}			
+					break;
+				}
+			}
 			
 			
 			
-			function ApplyPreMask(mask, value){//aqui
+			function ApplyPreMask(mask, value){
 				if (mask.indexOf(';') >= 0) {
 					if (value >=0) {
 						switch (mask.substring(0, mask.indexOf(';')))
@@ -2198,9 +3296,241 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				return prefix + ( ( isNegative ? '-' : '' ) + result ) + suffix;
 			};						
 			
+			function loadChildsOff(indexParent){//aqui
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff2(indexParent2);
+					}
+				}
+			};
 			
-			function onlyUnique(value, index, self)
-			{ 
+			function loadChildsOff2(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff3(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff3(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff4(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff4(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff5(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff5(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff6(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff6(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff7(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff7(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff8(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff8(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff9(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff9(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff10(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff10(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff11(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff11(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff12(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff12(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff13(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff13(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff14(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff14(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff15(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff15(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff16(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff16(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff17(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff17(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff18(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff18(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff19(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff19(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}
+				for (var anr2 = 0;anr2 < CustomParents2L[indexParent];anr2++){
+					var indexParent2 = CustomParents.indexOf(CustomParents2[indexParent][anr2]);
+					if(indexParent2 >= 0){
+						loadChildsOff20(indexParent2);
+					}
+				}
+			};
+
+			function loadChildsOff20(indexParent){
+				for (var anr = 0;anr < CustomParents2L[indexParent];anr++){
+					ArrayOff.push(CustomArrayBasic.indexOf(CustomParents2[indexParent][anr]) - 1);
+				}				
+			};
+
+			function onlyUnique(value, index, self)	{ 
 				return self.indexOf(value) === index;
 			};
 			function addSeparators (nStr, thousandsSep, decimalSep, numDecimals) {
@@ -2214,8 +3544,8 @@ define(["jquery","text!./PLSmartPivot.css"], function(e,t) {'use strict';
 				  x1 = x1.replace(rgx, '$1' + thousandsSep + '$2');
 				}
 				return x1 + x2;
-			};
-			
+			};			
 		}
 	};
 });
+

@@ -1,44 +1,44 @@
-﻿Accounts;Bold;Background;FontStyle;LetterColor;Align;Size;Comment
-Revenues;;rgb(183, 219, 255);<italic>;;<center>;;<comment>
-Gross sales revenues;;;;;;;
-Less return & allowances;;;;;;;
-Net sales revenues;<bold>;<soft>;;;;;
-Cost of goods sold;<bold>;;;;;;
-Direct materials;;;;;;;
-Direct labor;;;;;;;
-Manufacturing overhead;;#b7dbff;<italic>;;<center>;;<comment>
-Indirect labor;;;;;;;
-Depreciation, manufacturing equip;;;;;;;
-Other mfr overhead;;;;;;;
-Net mfr overhead;<bold>;<violete>;;;;;
-Net costs of goods sold;<bold>;<violete>;;;;;
-Gross profit;<bold>;<dark>;;;<center>;<large>;
-Operating expenses;<bold>;;<italic>;;;;
-Selling expenses;;;;;;;
-Sales salaries;;;;;;;
-Warranty expenses;;;;;;;
-Depreciation, store equipment;;;;;;;
-Other selling expenses3;;;;;;;
-Total selling expenses;<bold>;<violete>;;;;;
-General & administrative expenses;;#b7dbff;<italic>;;<center>;;<comment>
-Administration salaries;;;;;;;
-Rent expenses;;;;;;;
-Depreciation, computers;;;;;;;
-Other general & admin expenses;;;;;;;
-total general & admin expenses;<bold>;<soft>;;;;;
-total operating expenses;<bold>;<violete>;;;;;
-Operating income before taxes;<bold>;<dark>;;<white>;;<large>;
-Financial revenue & expenses;;#b7dbff;<italic>;;<center>;;<comment>
-Revenue from investments;;;;;;;
-Less interest expenses;;;;;;;
-Net financial gain (expense);;;;;;;
-Income before tax & extraordinary items;<bold>;<dark>;;<white>;;<large>;
-Less income tax on operations;;;;;;;
-Income before extraordinary items;;;;;;;
-Extraordinary items;;#b7dbff;<italic>;;<center>;;<comment>
-Sale of land;;;;;;;
-Less initial cost;;;;;;;
-Net gain on sale of land;<bold>;<soft>;;;;;
-Less income tax on gain;;;;;;;
-Extraordinary items after tax;<bold>;<soft>;;;;;
-Net Income (Profit);<bold>;<dark>;;<white>;<center>;<large>;
+﻿Accounts;Parent;Bold;Background;FontStyle;LetterColor;Align;Size;Comment
+Revenues;Net sales revenues;;"rgb(183, 219, 255)";<italic>;;<center>;;<comment>
+Gross sales revenues;Net sales revenues;;;;;;;
+Less return & allowances;Net sales revenues;;;;;;;
+Net sales revenues;Net mfr overhead;<bold>;<soft>;;;;;
+Cost of goods sold;Net mfr overhead;<bold>;;;;;;
+Direct materials;Net mfr overhead;;;;;;;
+Direct labor;Net mfr overhead;;;;;;;
+Manufacturing overhead;Net mfr overhead;;#b7dbff;<italic>;;<center>;;<comment>
+Indirect labor;Net mfr overhead;;;;;;;
+Depreciation, manufacturing equip;Net mfr overhead;;;;;;;
+Other mfr overhead;Net mfr overhead;;;;;;;
+Net mfr overhead;Gross profit;<bold>;<violete>;;;;;
+Net costs of goods sold;Gross profit;<bold>;<violete>;;;;;
+Gross profit;Operating income before taxes;<bold>;<dark>;;;<center>;<large>;
+Operating expenses;Total selling expenses;<bold>;;<italic>;;<center>;;<comment>
+Selling expenses;Total selling expenses;;;;;;;
+Sales salaries;Total selling expenses;;;;;;;
+Warranty expenses;Total selling expenses;;;;;;;
+Depreciation, store equipment;Total selling expenses;;;;;;;
+Other selling expenses3;Total selling expenses;;;;;;;
+Total selling expenses;total operating expenses;<bold>;<violete>;;;;;
+General & administrative expenses;Other general & admin expenses;;#b7dbff;<italic>;;<center>;;<comment>
+Administration salaries;Other general & admin expenses;;;;;;;
+Rent expenses;Other general & admin expenses;;;;;;;
+Depreciation, computers;Other general & admin expenses;;;;;;;
+Other general & admin expenses;total general & admin expenses;;;;;;;
+total general & admin expenses;total operating expenses;<bold>;<soft>;;;;;
+total operating expenses;Operating income before taxes;<bold>;<violete>;;;;;
+Operating income before taxes;Income before tax & extraordinary items;<bold>;<dark>;;<white>;;<large>;
+Financial revenue & expenses;Income before tax & extraordinary items;;#b7dbff;<italic>;;<center>;;<comment>
+Revenue from investments;Income before tax & extraordinary items;;;;;;;
+Less interest expenses;Income before tax & extraordinary items;;;;;;;
+Net financial gain (expense);Income before tax & extraordinary items;;;;;;;
+Income before tax & extraordinary items;Net gain on sale of land;<bold>;<dark>;;<white>;;<large>;
+Less income tax on operations;Net gain on sale of land;;;;;;;
+Income before extraordinary items;Net gain on sale of land;;;;;;;
+Extraordinary items;Net gain on sale of land;;#b7dbff;<italic>;;<center>;;<comment>
+Sale of land;Net gain on sale of land;;;;;;;
+Less initial cost;Net gain on sale of land;;;;;;;
+Net gain on sale of land;Extraordinary items after tax;<bold>;<soft>;;;;;
+Less income tax on gain;Extraordinary items after tax;;;;;;;
+Extraordinary items after tax;Net Income (Profit);<bold>;<soft>;;;;;
+Net Income (Profit);;<bold>;<dark>;;<white>;<center>;<large>;

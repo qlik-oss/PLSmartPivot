@@ -1,11 +1,32 @@
-.qv-object-PLSmartPivot div.qv-object-content-container {
+.qv-object-PLSmartPivot .qv-object-content-container {
 	overflow-x:scroll;
 	overflow-y:hidden;
-	z-index:110
+	z-index:110;
 }
-
-.qv-object-PLSmartPivot icon-xls {
-	text-align:left
+.icon-xls{
+    height:30px;
+}
+.icon-pdf{
+    height:30px;
+}
+.qv-object-PLSmartPivot .icon-xls {
+	text-align:left;
+}
+.qv-object-PLSmartPivot .icon-pdf {
+    text-align:left
+}
+.qv-object-PLSmartPivot .icon-plus {
+    text-align:left;
+    height:12px;
+    cursor: pointer;
+    /*background-image: url("/Extensions/PLSmartPivot/plus.png");
+    background-repeat: no-repeat;*/
+}.qv-object-PLSmartPivot .icon-minus {
+    text-align:left;
+    height:12px;
+    cursor: pointer;    
+    /*background-image: url("/Extensions/PLSmartPivot/minus.png");
+    background-repeat: no-repeat;*/
 }
 .qv-object-PLSmartPivot button {
 	width: 100%;
@@ -16,7 +37,8 @@
     width:auto;
     border-left:1px solid #d3d3d3;
     border-right:1px solid #d3d3d3;
-    border-top:1px solid #d3d3d3
+    border-spacing:0;
+    border-top:1px solid #d3d3d3;    
     }
 .qv-object-PLSmartPivot td, th{
     border: 1px solid #ffffff;
@@ -65,8 +87,8 @@
 .tooltip
 {
     position: fixed!important;
-    color: RGB(70,70,70);
-    background-color: RGB(245,239,207);
+    color: #464646;
+    background-color: #f5efcf;
     text-align: center;
     border: groove;
 }
@@ -74,7 +96,7 @@
 .row-wrapper{
     position:absolute;
     top:97px;
-    height:100%!Important;
+    height:100%!important;
     overflow-x:hidden;
     overflow-y:scroll;
     padding:0;
@@ -113,8 +135,8 @@
 /*******************/
 /*body*/
 .qv-object-PLSmartPivot .grid-cells{
-    min-width:70px!Important;
-    max-width:70px!Important;
+    min-width:70px!important;
+    max-width:70px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -122,8 +144,8 @@
     
 /*header*/
 .qv-object-PLSmartPivot .grid-cells2{
-    min-width:69px!Important;
-    max-width:69px!Important;
+    min-width:69px!important;
+    max-width:69px!important;
     cursor: pointer;
     
     /*padding:5px 10px;
@@ -132,8 +154,8 @@
     
 /*body*/
 .qv-object-PLSmartPivot .grid-cells-small{
-    min-width:52px!Important;
-    max-width:52px!Important;
+    min-width:52px!important;
+    max-width:52px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -141,8 +163,8 @@
     
 /*header*/
 .qv-object-PLSmartPivot .grid-cells2-small{
-    min-width:51px!Important;
-    max-width:51px!Important;
+    min-width:51px!important;
+    max-width:51px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -154,8 +176,8 @@
 
 /*body*/
 .qv-object-PLSmartPivot .grid-cells-s{
-    min-width:67px!Important;
-    max-width:67px!Important;
+    min-width:67px!important;
+    max-width:67px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -163,8 +185,8 @@
     
 /*header*/
 .qv-object-PLSmartPivot .grid-cells2-s{
-    min-width:66px!Important;
-    max-width:66px!Important;
+    min-width:66px!important;
+    max-width:66px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -172,8 +194,8 @@
     
 /*body*/
 .qv-object-PLSmartPivot .grid-cells-small-s{
-    min-width:52px!Important;
-    max-width:52px!Important;
+    min-width:52px!important;
+    max-width:52px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -181,8 +203,8 @@
     
 /*header*/
 .qv-object-PLSmartPivot .grid-cells2-small-s{
-    min-width:51px!Important;
-    max-width:51px!Important;
+    min-width:51px!important;
+    max-width:51px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -193,8 +215,8 @@
 /*******************/
 /*body*/
 .qv-object-PLSmartPivot .grid-cells-l{
-    min-width:82px!Important;
-    max-width:82px!Important;
+    min-width:82px!important;
+    max-width:82px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -202,8 +224,8 @@
     
 /*header*/
 .qv-object-PLSmartPivot .grid-cells2-l{
-    min-width:81px!Important;
-    max-width:81px!Important;
+    min-width:81px!important;
+    max-width:81px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -211,8 +233,8 @@
     
 /*body*/
 .qv-object-PLSmartPivot .grid-cells-small-l{
-    min-width:66px!Important;
-    max-width:66px!Important;
+    min-width:66px!important;
+    max-width:66px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -220,8 +242,8 @@
     
 /*header*/
 .qv-object-PLSmartPivot .grid-cells2-small-l{
-    min-width:65px!Important;
-    max-width:65px!Important;
+    min-width:65px!important;
+    max-width:65px!important;
     cursor: pointer;
     /*padding:5px 10px;
     margin:0;*/
@@ -230,8 +252,8 @@
 
 /*First Column*/
 .qv-object-PLSmartPivot .fdim-cells{
-    min-width:230px!Important;
-    max-width:230px!Important;
+    min-width:230px!important;
+    max-width:230px!important;
     cursor: pointer;
     background-color:white;
     /*padding:0 20px*/
@@ -277,7 +299,7 @@
     top:0;
     left:0;
     border-right:1px solid white;
-    box-shadow:4px 2px 8px #e1e1e1
+    box-shadow:4px 2px 8px #e1e1e1;
     }
 .kpi-table .row-wrapper{
     overflow:hidden
