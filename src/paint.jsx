@@ -26,7 +26,7 @@ export default async function paint ($element, layout, component) {
     styling: { useSeparatorColumns }
   } = state;
 
-  const editmodeClass = component._inEditState ? 'edit-mode' : '';
+  const editmodeClass = component.inAnalysisState() ? '' : 'edit-mode';
   const jsx = (
     <React.Fragment>
       <div className={`kpi-table ${editmodeClass}`}>
