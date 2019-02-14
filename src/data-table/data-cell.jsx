@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { ApplyPreMask } from '../masking';
 import { addSeparators } from '../utilities';
-
+import Tooltip from '../tooltip/index.jsx';
 function formatMeasurementValue (measurement, styling) {
   // TODO: measurement.name is a horrible propertyname, it's actually the column header
   const isColumnPercentageBased = measurement.name.substring(0, 1) === '%';
@@ -61,51 +61,100 @@ function getSemaphoreColors (measurement, semaphoreColors) {
   }
   return semaphoreColors.statusColors.normal;
 }
-
-const DataCell = ({ data, general, measurement, styleBuilder, styling }) => {
-  const isColumnPercentageBased = measurement.name.substring(0, 1) === '%';
-  let formattedMeasurementValue = formatMeasurementValue(measurement, styling);
-  if (styleBuilder.hasComments()) {
-    formattedMeasurementValue = '.';
-  }
-
-  let cellStyle = {
-    fontFamily: styling.options.fontFamily,
-    ...styleBuilder.getStyle(),
-    paddingRight: '4px',
-    textAlign: 'right'
-
-  };
-  const { semaphoreColors } = styling;
-  const isValidSemaphoreValue = !styleBuilder.hasComments() && !isNaN(measurement.value);
-  const shouldHaveSemaphoreColors = semaphoreColors.fieldsToApplyTo.applyToAll || semaphoreColors.fieldsToApplyTo.specificFields.indexOf(measurement.name) !== -1;
-  if (isValidSemaphoreValue && shouldHaveSemaphoreColors) {
-    const { backgroundColor, color } = getSemaphoreColors(measurement, semaphoreColors);
-    cellStyle = {
-      backgroundColor,
-      color,
-      fontFamily: styling.options.fontFamily,
-      fontSize: styleBuilder.getStyle().fontSize,
-      paddingLeft: '4px',
-      textAlign: 'right'
+class DataCell extends React.Component {
+  constructor (props) {
+    super(props);
+    this.state = {
+      bool: false,
+      mouseXPosition: 0,
+      mouseYPosition: 0
     };
+    this.handleEnter = this.handleEnter.bind(this);
+    this.handleLeave = this.handleLeave.bind(this);
   }
 
-  let cellClass = 'grid-cells';
-  const shouldUseSmallCells = isColumnPercentageBased && data.headers.measurements.length > 1;
-  if (shouldUseSmallCells) {
-    cellClass = 'grid-cells-small';
+  shouldComponentUpdate (nextProps, nextState) {
+    const { bool } = this.state;
+    if (bool === nextState.bool) {
+      return false;
+    }
+    return true;
   }
 
-  return (
-    <td
-      className={`${cellClass}${general.cellSuffix}`}
-      style={cellStyle}
-    >
-      {formattedMeasurementValue}
-    </td>
-  );
-};
+  handleEnter (event) {
+    this.setState({ bool: true,
+      mouseXPosition: event.clientX,
+      mouseYPosition: event.clientY });
+  }
+
+  handleLeave () {
+    this.setState({ bool: false });
+  }
+
+  render () {
+    const { bool, mouseXPosition, mouseYPosition } = this.state;
+    const {
+      data,
+      general,
+      measurement,
+      styleBuilder,
+      styling
+    } = this.props;
+
+    const isColumnPercentageBased = measurement.name.substring(0, 1) === '%';
+    let formattedMeasurementValue = formatMeasurementValue(measurement, styling);
+    if (styleBuilder.hasComments()) {
+      formattedMeasurementValue = '.';
+    }
+    let cellStyle = {
+      fontFamily: styling.options.fontFamily,
+      ...styleBuilder.getStyle(),
+      paddingRight: '4px',
+      textAlign: 'right'
+
+    };
+    const { semaphoreColors } = styling;
+    const isValidSemaphoreValue = !styleBuilder.hasComments() && !isNaN(measurement.value);
+    const shouldHaveSemaphoreColors = semaphoreColors.fieldsToApplyTo.applyToAll || semaphoreColors.fieldsToApplyTo.specificFields.indexOf(measurement.name) !== -1;
+    if (isValidSemaphoreValue && shouldHaveSemaphoreColors) {
+      const { backgroundColor, color } = getSemaphoreColors(measurement, semaphoreColors);
+      cellStyle = {
+        backgroundColor,
+        color,
+        fontFamily: styling.options.fontFamily,
+        fontSize: styleBuilder.getStyle().fontSize,
+        paddingLeft: '4px',
+        textAlign: 'right'
+      };
+    }
+
+    let cellClass = 'grid-cells';
+    const shouldUseSmallCells = isColumnPercentageBased && data.headers.measurements.length > 1;
+    if (shouldUseSmallCells) {
+      cellClass = 'grid-cells-small';
+    }
+
+    return (
+      <td
+        className={`${cellClass}${general.cellSuffix}`}
+        onMouseOut={this.handleLeave}
+        onMouseOver={this.handleEnter}
+        // onMouseEnter={this.handleEnter()}
+        // onMouseLeave={this.handleLeave()}
+        style={cellStyle}
+      >
+        {formattedMeasurementValue}
+        {bool
+          ?
+          <Tooltip
+            data={formattedMeasurementValue}
+            xPosition={mouseXPosition}
+            yPosition={mouseYPosition}
+          /> : null}
+      </td>
+    );
+  }
+}
 
 DataCell.propTypes = {
   data: PropTypes.shape({
