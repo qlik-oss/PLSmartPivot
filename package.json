@@ -31,7 +31,7 @@
     "gulp": "4.0.0",
     "gulp-util": "^3.0.7",
     "gulp-zip": "3.0.2",
-    "less": "3.8.1",
+    "less": "3.13.1",
     "less-loader": "4.1.0",
     "lodash.merge": "4.6.1",
     "style-loader": "0.23.1",
