@@ -12,70 +12,63 @@ console.log('Webpack mode:', MODE); // eslint-disable-line no-console
 
 const config = {
   devtool: DEVTOOL,
-  entry: ['./src/index.js'],
+  entry: ["./src/index.js"],
   externals: {
     jquery: {
-      amd: 'jquery',
-      commonjs: 'jquery',
-      commonjs2: 'jquery',
-      root: '_'
+      amd: "jquery",
+      commonjs: "jquery",
+      commonjs2: "jquery",
+      root: "_",
     },
     qlik: {
-      amd: 'qlik',
-      commonjs: 'qlik',
-      commonjs2: 'qlik',
-      root: '_'
-    }
+      amd: "qlik",
+      commonjs: "qlik",
+      commonjs2: "qlik",
+      root: "_",
+    },
   },
   mode: MODE,
   module: {
     rules: [
       {
-        enforce: 'pre',
+        enforce: "pre",
         exclude: /(node_modules|Library)/,
-        loader: 'eslint-loader',
+        loader: "eslint-loader",
         options: {
-          failOnError: true
+          failOnError: true,
         },
-        test: /\.(js|jsx)$/
+        test: /\.(js|jsx)$/,
       },
       {
         exclude: /node_modules/,
         test: /\.(js|jsx)$/,
         use: {
-          loader: 'babel-loader',
+          loader: "babel-loader",
           options: {
             plugins: [
-              '@babel/plugin-transform-async-to-generator',
-              '@babel/plugin-proposal-class-properties'
+              "@babel/plugin-transform-async-to-generator",
+              "@babel/plugin-proposal-class-properties",
             ],
-            presets: [
-              '@babel/preset-env',
-              '@babel/preset-react'
-            ]
-          }
-        }
+            presets: ["@babel/preset-env", "@babel/preset-react"],
+          },
+        },
       },
       {
         test: /.less$/,
-        use: [
-          'style-loader',
-          'css-loader',
-          'less-loader'
-        ]
-      }
-    ]
+        use: ["style-loader", "css-loader", "less-loader"],
+      },
+    ],
   },
   output: {
-    filename: `${packageJSON.name}.js`,
-    libraryTarget: 'amd',
-    path: DIST
+    filename: "qlik-smart-pivot.js",
+    libraryTarget: "amd",
+    path: DIST,
   },
   plugins: [
     new StyleLintPlugin({
-      files: '**/*.less'
-    })
-  ]
+      files: "**/*.less",
+    }),
+  ],
 };
 
 module.exports = config;
