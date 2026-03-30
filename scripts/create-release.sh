@@ -1,10 +1,19 @@
 #!/bin/bash
 set -o errexit
 
-echo "Creating release for version: $VERSION"
-echo "Artifact name: ./dist/${3}_${VERSION}.zip"
-$HOME/bin/ghr -t ${ghoauth} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} ${VERSION} "./dist/${3}_${4}.zip"
+GITHUB_ORG="${1}"
+GITHUB_REPO="${2}"
+PACKAGE_NAME="${3}"
+VERSION="${4}"
+
+echo "Creating release for version: ${VERSION}"
+echo "Artifact name: ./dist/${PACKAGE_NAME}_${VERSION}.zip"
+
+gh release create "${VERSION}" "./dist/${PACKAGE_NAME}_${VERSION}.zip" \
+  --repo "${GITHUB_ORG}/${GITHUB_REPO}" \
+  --title "${VERSION}" \
+  --notes "Release ${VERSION}"
 
 
 # Usage
-# $ create-release.sh qlik-oss qsSimpleKPI qlik-multi-kpi 0.3.1
+# $ create-release.sh qlik-oss PLSmartPivot qlik-smart-pivot 0.3.1

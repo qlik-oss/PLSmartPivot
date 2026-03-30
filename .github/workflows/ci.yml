@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint (ESLint)
+        run: npm run eslint
+
+      - name: Lint (stylelint)
+        run: npm run stylelint
+
+      - name: Build
+        run: npm run build:zip
+        env:
+          NODE_ENV: production
+          VERSION: dev
+
+      - name: Verify build output
+        run: |
+          chmod +x scripts/verify-files.sh
+          scripts/verify-files.sh
+        env:
+          VERSION: dev
