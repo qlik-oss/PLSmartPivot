@@ -1,0 +1,49 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+env:
+  GITHUB_ORG: qlik-oss
+  GITHUB_REPO: PLSmartPivot
+  PACKAGE_NAME: qlik-smart-pivot
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Bump version
+        run: |
+          chmod +x scripts/bump-version.sh scripts/get-latest-version.sh
+          scripts/bump-version.sh ${{ env.GITHUB_ORG }} ${{ env.GITHUB_REPO }}
+
+      - name: Build and package
+        run: |
+          export VERSION=$(scripts/get-bumped-version.sh)
+          echo "Version: ${VERSION}"
+          npm run build:zip
+          chmod +x scripts/verify-files.sh
+          scripts/verify-files.sh
+        env:
+          NODE_ENV: production
+
+      - name: Create GitHub Release
+        run: |
+          export VERSION=$(scripts/get-bumped-version.sh)
+          echo "Version: ${VERSION}"
+          chmod +x scripts/create-release.sh
+          scripts/create-release.sh ${{ env.GITHUB_ORG }} ${{ env.GITHUB_REPO }} ${{ env.PACKAGE_NAME }} ${VERSION}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

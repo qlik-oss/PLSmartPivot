@@ -5,7 +5,10 @@ join_by () {
   local IFS="$1"; shift; echo "$*";
 }
 
-if [ "${CIRCLE_BRANCH}" == "master" ]; then
+BRANCH="${GITHUB_REF_NAME:-${CIRCLE_BRANCH}}"
+BUILD_NUM="${GITHUB_RUN_NUMBER:-${CIRCLE_BUILD_NUM}}"
+
+if [ "${BRANCH}" = "master" ]; then
   # get version from repo
   OLD_VERSION="$(scripts/get-latest-version.sh $1 $2)"
   echo "Latest GitHub release version: ${OLD_VERSION}"
@@ -18,8 +21,8 @@ if [ "${CIRCLE_BRANCH}" == "master" ]; then
 
   # join into string
   NEW_VERSION=$(join_by . ${ARRAY_VERSION[@]})
-elif [[ ! -z "${CIRCLE_BRANCH}" && ! -z "${CIRCLE_BUILD_NUM}" ]]; then
-    NEW_VERSION="$(echo ${CIRCLE_BRANCH} | sed -e 's/\//-/g')_${CIRCLE_BUILD_NUM}"
+elif [[ ! -z "${BRANCH}" && ! -z "${BUILD_NUM}" ]]; then
+    NEW_VERSION="$(echo ${BRANCH} | sed -e 's/\//-/g')_${BUILD_NUM}"
 else
     NEW_VERSION="dev"
 fi
